@@ -2,6 +2,7 @@ import os
 from openai import AzureOpenAI
 from dotenv import load_dotenv
 from powerbi_client import get_latest_metrics
+from intent import classify_intent
 
 load_dotenv()
 
@@ -43,20 +44,12 @@ def summarize_metrics(metrics: dict) -> str:
 
 
 def chat_with_dashboard(history: list, message: str) -> str:
-    prompt = f"""
-    Classify the intent of the following user message.
-    Return one of: [summary, other]
-
-    Message: "{message}"
-    """
-
-    response = client.chat.completions.create(
-        model=os.getenv("GPT4_MODEL"),
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    intent = response.choices[0].message.content.strip().lower()
+    intent = classify_intent(message)
     print(intent)
+
+    if "summary" == intent:
+        summary = summarize_metrics(get_latest_metrics())
+        return f"Here’s the current dashboard summary:\n\n{summary}"
 
     
     prompt = f"""
@@ -65,12 +58,6 @@ def chat_with_dashboard(history: list, message: str) -> str:
     Respond to the user’s questions based on current operational metrics,
     focusing on real-time visibility, synergy, and sustainability.
     """
-
-    if "summary" == intent:
-        summary = summarize_metrics(get_latest_metrics())
-        return f"Here’s the current dashboard summary:\n\n{summary}"
-
-    
 
     messages = [{"role": "system", "content": prompt}] + history + [
         {"role": "user", "content": message}
