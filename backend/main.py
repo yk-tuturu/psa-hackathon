@@ -37,8 +37,5 @@ def summarize(request: MetricsRequest):
 
 @app.post("/chat")
 def chat(msg: ChatMessage):
-    # Fetch live metrics before responding
-    metrics = get_latest_metrics()
-
-    reply = chat_with_dashboard(msg.history, msg.message, metrics)
+    reply = chat_with_dashboard(msg.history, msg.message)
     return {"reply": reply}

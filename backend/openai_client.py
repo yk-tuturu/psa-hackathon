@@ -1,13 +1,14 @@
 import os
-from openai import OpenAI
+from openai import AzureOpenAI
 from dotenv import load_dotenv
 from powerbi_client import get_latest_metrics
 
 load_dotenv()
 
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv("OPENROUTER_API_KEY")
+client = AzureOpenAI(
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    api_version="2025-01-01-preview",
+    azure_endpoint=os.getenv("AZURE_OPENAI_API_ENDPOINT")
 )
 
 def summarize_metrics(metrics: dict) -> str:
@@ -33,7 +34,7 @@ def summarize_metrics(metrics: dict) -> str:
     """
 
     response = client.chat.completions.create(
-        model="openai/gpt-4o",
+        model=os.getenv("OPENAI_MODEL"),
         messages=[{"role": "user", "content": prompt}],
         max_tokens=500
     )
@@ -41,21 +42,22 @@ def summarize_metrics(metrics: dict) -> str:
     return response.choices[0].message.content
 
 
-def chat_with_dashboard(history: list, message: str, metrics) -> str:
+def chat_with_dashboard(history: list, message: str) -> str:
     prompt = f"""
     Classify the intent of the following user message.
-    Return one of: [summary, question, action, other]
+    Return one of: [summary, other]
 
     Message: "{message}"
     """
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model=os.getenv("GPT4_MODEL"),
         messages=[{"role": "user", "content": prompt}]
     )
 
     intent = response.choices[0].message.content.strip().lower()
     print(intent)
+
     
     prompt = f"""
     You are an AI assistant helping PSA interpret its Global Insights Dashboard.
@@ -64,8 +66,8 @@ def chat_with_dashboard(history: list, message: str, metrics) -> str:
     focusing on real-time visibility, synergy, and sustainability.
     """
 
-    if "summary" in intent:
-        summary = summarize_metrics(metrics)
+    if "summary" == intent:
+        summary = summarize_metrics(get_latest_metrics())
         return f"Here’s the current dashboard summary:\n\n{summary}"
 
     
@@ -77,7 +79,7 @@ def chat_with_dashboard(history: list, message: str, metrics) -> str:
 
 
     response = client.chat.completions.create(
-        model="openai/gpt-4o",
+        model=os.getenv("OPENAI_MODEL"),
         messages=messages,
         max_tokens=500
     )
