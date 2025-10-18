@@ -3,6 +3,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+def get_report_details():
+    workspace_id = os.getenv("POWERBI_WORKSPACE_ID")
+    report_id = os.getenv("POWERBI_REPORT_ID")
+
+    token = get_access_token()
+    headers = {"Authorization": f"Bearer {token}"}
+    url = f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/reports/{report_id}"
+
+    res = requests.get(url, headers=headers)
+    res.raise_for_status()
+    return res.json()
+
 def get_access_token():
     tenant_id = os.getenv("POWERBI_TENANT_ID")
     client_id = os.getenv("POWERBI_CLIENT_ID")
@@ -20,14 +32,24 @@ def get_access_token():
     res.raise_for_status()
     return res.json()["access_token"]
 
-def get_report_details():
+
+def generate_embed_token():
     workspace_id = os.getenv("POWERBI_WORKSPACE_ID")
     report_id = os.getenv("POWERBI_REPORT_ID")
+    dataset_id = os.getenv("POWERBI_DATASET_ID")
 
-    token = get_access_token()
-    headers = {"Authorization": f"Bearer {token}"}
-    url = f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/reports/{report_id}"
+    access_token = get_access_token()
+    headers = {"Authorization": f"Bearer {access_token}"}
 
-    res = requests.get(url, headers=headers)
+    url = f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/reports/{report_id}/GenerateToken"
+
+    body = {
+        "datasets": [{"id": dataset_id}],
+        "reports": [{"id": report_id}],
+        "targetWorkspaces": [{"id": workspace_id}],
+        "accessLevel": "View"
+    }
+
+    res = requests.post(url, headers=headers, json=body)
     res.raise_for_status()
     return res.json()
