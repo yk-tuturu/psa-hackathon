@@ -1,6 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+from powerbi_client import get_latest_metrics
 
 load_dotenv()
 
@@ -39,11 +40,55 @@ def summarize_metrics(metrics: dict) -> str:
 
     return response.choices[0].message.content
 
-if __name__ == "__main__":
-    sample_metrics = {
-        "berth_time": 12.5,
-        "carbon_savings": 1500,
-        "arrival_accuracy": 95.2
-    }
-    summary = summarize_metrics(sample_metrics)
-    print(summary)
+
+def chat_with_dashboard(history: list, message: str, metrics) -> str:
+    prompt = f"""
+    Classify the intent of the following user message.
+    Return one of: [summary, question, action, other]
+
+    Message: "{message}"
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    intent = response.choices[0].message.content.strip().lower()
+    print(intent)
+    
+    prompt = f"""
+    You are an AI assistant helping PSA interpret its Global Insights Dashboard.
+
+    Respond to the user’s questions based on current operational metrics,
+    focusing on real-time visibility, synergy, and sustainability.
+    """
+
+    if "summary" in intent:
+        summary = summarize_metrics(metrics)
+        return f"Here’s the current dashboard summary:\n\n{summary}"
+
+    
+
+    messages = [{"role": "system", "content": prompt}] + history + [
+        {"role": "user", "content": message}
+    ]
+
+
+
+    response = client.chat.completions.create(
+        model="openai/gpt-4o",
+        messages=messages,
+        max_tokens=500
+    )
+
+    return response.choices[0].message.content
+
+#if __name__ == "__main__":
+#    sample_metrics = {
+#        "berth_time": 12.5,
+#        "carbon_savings": 1500,
+#        "arrival_accuracy": 95.2
+#    }
+#    summary = summarize_metrics(sample_metrics)
+#    print(summary)

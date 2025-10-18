@@ -53,3 +53,12 @@ def generate_embed_token():
     res = requests.post(url, headers=headers, json=body)
     res.raise_for_status()
     return res.json()
+
+
+def get_latest_metrics():
+    # Example simulated data — later can change to fetch from dataset/table
+    return {
+        "berth_time": 12.3,
+        "carbon_savings": 1600,
+        "arrival_accuracy": 96.1
+    }
