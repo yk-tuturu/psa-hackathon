@@ -175,7 +175,7 @@ if st.button("Clear Chat History"):
     fresh_chat()
 
 
-HtmlFile = open("powerbi/test.html", 'r', encoding='utf-8')
+HtmlFile = open("test.html", 'r', encoding='utf-8')
 source_code = HtmlFile.read() 
 components.html(source_code, height=700)
 
