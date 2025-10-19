@@ -12,6 +12,43 @@ load_dotenv()
 BACKEND_URL = os.getenv("BACKEND_URL")
 USE_BACKEND = False
 
+st.markdown(
+    """
+    <style>
+    .stTextInput > :nth-child(2) {
+        position: relative; /* important for absolute positioning */
+        border-width: 0px;
+    }
+    .stTextInput > :nth-child(2):focus-within {
+        border-width: 0px;
+    }
+
+    .stTextInput > :nth-child(2)::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 100;
+        border-radius: 0.5rem;
+        padding: 1.5px; /* border thickness */
+        background: linear-gradient(45deg, #3b82f6, #8b5cf6); /* blue → purple */
+        -webkit-mask: 
+            linear-gradient(#fff 0 0) content-box, 
+            linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0;           /* start invisible */
+        transition: opacity 0.1s ease-in-out;
+    }
+
+    .stTextInput > :nth-child(2):focus-within::before {
+        opacity: 1;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Initialize cookie manager
 cookies = EncryptedCookieManager(
     prefix="my_app_",  # optional prefix to avoid collisions
@@ -95,6 +132,40 @@ if prompt := st.chat_input("Type your message..."):
     # Add assistant message
     st.session_state["messages"].append({"role": "assistant", "content": response})
     save_history(user_id, st.session_state["messages"])
+
+# attempt to inject css
+st.markdown(
+    """
+    <style>
+    .stChatInput {
+        border-width: 0px !important;
+    }
+
+    .stChatInput::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 100;
+        border-radius: 1.25rem;
+        padding: 1.5px; /* border thickness */
+        background: linear-gradient(45deg, #3b82f6, #8b5cf6); /* blue → purple */
+        -webkit-mask: 
+            linear-gradient(#fff 0 0) content-box, 
+            linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0;           /* start invisible */
+        transition: opacity 0.1s ease-in-out;
+    }
+
+    .stChatInput:focus-within::before {
+        opacity: 1
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # request for chat completion from backend
 def send_request(prompt):
