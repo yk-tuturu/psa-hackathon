@@ -92,15 +92,19 @@ else:
 # else:
 #     print(st.session_state["apiKey"])
 
+def fresh_chat():
+    st.session_state["messages"] = []
+    st.session_state["messages"].append({
+        "role": "assistant", 
+        "content": "Hi there! This is your PSA Dashboard Assistant! \n\n You can ask me about anything!"})
+    save_history(user_id, st.session_state["messages"])
+
 # Load chat history from db
 if "messages" not in st.session_state:
     st.session_state["messages"] = load_history(user_id)
 
 if st.session_state["messages"] == []:
-    st.session_state["messages"].append({
-        "role": "assistant", 
-        "content": "Hi there! This is your PSA Dashboard Assistant! \n\n You can ask me about anything!"})
-    save_history(user_id, st.session_state["messages"])
+    fresh_chat()
 
 # Set titles
 st.set_page_config(page_title="Chatbot", page_icon="💬", layout="wide")
@@ -168,7 +172,7 @@ st.markdown(
 
 if st.button("Clear Chat History"):
     clear_history(user_id)
-    st.rerun()
+    fresh_chat()
 
 
 HtmlFile = open("powerbi/test.html", 'r', encoding='utf-8')
