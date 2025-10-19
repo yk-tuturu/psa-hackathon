@@ -31,6 +31,28 @@ if "user_id" not in cookies:
 else:
     user_id = cookies["user_id"]
 
+# ---- OPENAI KEY POPUP ----
+@st.dialog("Enter OpenAI API key", width="medium", dismissible=False)
+def getAPIKey():
+    st.write("Just key in anything, this is just for testing")
+    apiKey = st.text_input("", placeholder="Enter API key...", label_visibility="hidden")
+    if st.button("Enter"):
+        saveAPIKey(apiKey)
+    
+    if (apiKey):
+        saveAPIKey(apiKey)
+        
+def saveAPIKey(key):
+    # Include some verification for the openai key later on
+    st.session_state["apiKey"] = key
+    st.rerun()
+
+if "apiKey" not in st.session_state:
+    getAPIKey()
+    st.stop()
+else:
+    print(st.session_state["apiKey"])
+
 # Load chat history from db
 if "messages" not in st.session_state:
     st.session_state["messages"] = load_history(user_id)
