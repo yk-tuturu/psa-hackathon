@@ -6,11 +6,13 @@ import os
 import uuid
 from dotenv import load_dotenv
 from history import get_user_id, load_history, save_history, clear_history
+from api import get_chat_completion
+import streamlit.components.v1 as components
 
 load_dotenv()
 
 BACKEND_URL = os.getenv("BACKEND_URL")
-USE_BACKEND = False
+USE_BACKEND = True
 
 st.markdown(
     """
@@ -68,70 +70,41 @@ if "user_id" not in cookies:
 else:
     user_id = cookies["user_id"]
 
-# ---- OPENAI KEY POPUP ----
-@st.dialog("Enter OpenAI API key", width="medium", dismissible=False)
-def getAPIKey():
-    st.write("Just key in anything, this is just for testing")
-    apiKey = st.text_input("", placeholder="Enter API key...", label_visibility="hidden")
-    if st.button("Enter"):
-        saveAPIKey(apiKey)
+# # ---- OPENAI KEY POPUP ----
+# @st.dialog("Enter OpenAI API key", width="medium", dismissible=False)
+# def getAPIKey():
+#     st.write("Just key in anything, this is just for testing")
+#     apiKey = st.text_input("", placeholder="Enter API key...", label_visibility="hidden")
+#     if st.button("Enter"):
+#         saveAPIKey(apiKey)
     
-    if (apiKey):
-        saveAPIKey(apiKey)
+#     if (apiKey):
+#         saveAPIKey(apiKey)
         
-def saveAPIKey(key):
-    # Include some verification for the openai key later on
-    st.session_state["apiKey"] = key
-    st.rerun()
+# def saveAPIKey(key):
+#     # Include some verification for the openai key later on
+#     st.session_state["apiKey"] = key
+#     st.rerun()
 
-if "apiKey" not in st.session_state:
-    getAPIKey()
-    st.stop()
-else:
-    print(st.session_state["apiKey"])
+# if "apiKey" not in st.session_state:
+#     getAPIKey()
+#     st.stop()
+# else:
+#     print(st.session_state["apiKey"])
 
 # Load chat history from db
 if "messages" not in st.session_state:
     st.session_state["messages"] = load_history(user_id)
 
-# Set titles
-st.set_page_config(page_title="Chatbot", page_icon="💬", layout="centered")
-st.title("💬 PSA Network Insights Dashboard")
-
-# Load messages into UI
-for msg in st.session_state["messages"]:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-# User input
-if prompt := st.chat_input("Type your message..."):
-    # Add user message
-    st.session_state["messages"].append({"role": "user", "content": prompt})
-
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    
-    # Get response
-    with st.chat_message("assistant"):
-        response = ""
-        message_placeholder = st.empty()
-        message_placeholder.markdown("...")
-
-        if USE_BACKEND:
-            response = send_request(prompt)
-
-            time.sleep(0.5)
-            message_placeholder.markdown(response)
-
-        # not using backend, placeholder text for frontend testing
-        else: 
-            time.sleep(0.5)
-            response = f"You said **{prompt}**"
-            message_placeholder.markdown(response)
-
-    # Add assistant message
-    st.session_state["messages"].append({"role": "assistant", "content": response})
+if st.session_state["messages"] == []:
+    st.session_state["messages"].append({
+        "role": "assistant", 
+        "content": "Hi there! This is your PSA Dashboard Assistant! \n\n You can ask me about anything!"})
     save_history(user_id, st.session_state["messages"])
+
+# Set titles
+st.set_page_config(page_title="Chatbot", page_icon="💬", layout="wide")
+st.title("💬 PSA Network Insights Dashboard")
 
 # attempt to inject css
 st.markdown(
@@ -162,24 +135,90 @@ st.markdown(
     .stChatInput:focus-within::before {
         opacity: 1
     }
+
+    .stMainBlockContainer {
+        padding-left: 15rem;
+        padding-right: 15rem;
+        padding-top: 3rem;
+        padding-bottom: 1rem;
+    }
+
+    #tabs-bui2-tabpanel-1 {
+        max-height: 700px !important;
+        height: 700px !important;
+        overflow-y: scroll !important;
+        padding-left: 2rem;
+        padding-right: 2rem;
+        font-size: 18px;
+        margin-top: 1rem;
+    }
+
+    .stTabs button > * {
+        font-size: 20px !important;
+    }
+
+    .stBottom{
+        padding-left: 9rem;
+        padding-right: 9rem;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# request for chat completion from backend
-def send_request(prompt):
-    payload = {
-        "history": st.session_state["messages"],  # entire conversation so far
-        "message": prompt     # new user message
-    }
+if st.button("Clear Chat History"):
+    clear_history(user_id)
+    st.rerun()
 
-    try:
-        res = requests.post(f"{BACKEND_URL}/chat", json=payload, timeout=30)
-        if res.status_code == 200:
-            response = res.json().get("reply", "No reply received")
-        else:
-            return f"Error {res.status_code}: {res.text}"
-    except Exception as e:
-        return f"Error: {e}"
+
+HtmlFile = open("powerbi/test.html", 'r', encoding='utf-8')
+source_code = HtmlFile.read() 
+components.html(source_code, height=700)
+
+# Display sidebar content when toggled
+
+# Load messages into UI
+for msg in st.session_state["messages"]:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# User input
+if prompt := st.chat_input("Type your message..."):
+    # Add user message
+    st.session_state["messages"].append({"role": "user", "content": prompt})
+
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    # Get response
+    with st.chat_message("assistant"):
+        response = ""
+        message_placeholder = st.empty()
+        message_placeholder.markdown("...")
+
+        if USE_BACKEND:
+            response = get_chat_completion(prompt, st.session_state["messages"])
+
+            time.sleep(0.5)
+            message_placeholder.markdown(response)
+
+        # not using backend, placeholder text for frontend testing
+        else: 
+            response = f"You said **{prompt}**"
+            message_placeholder.markdown(response)
+
+    # Add assistant message
+    st.session_state["messages"].append({"role": "assistant", "content": response})
+
+    if len(st.session_state["messages"]) > 10:
+        st.session_state["messages"].pop(0)
+    
+    save_history(user_id, st.session_state["messages"])
+
+
+    
+
+
+
+
 
