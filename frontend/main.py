@@ -59,19 +59,7 @@ if prompt := st.chat_input("Type your message..."):
         message_placeholder.markdown("...")
 
         if USE_BACKEND:
-            payload = {
-                "history": st.session_state["messages"],  # entire conversation so far
-                "message": prompt     # new user message
-            }
-
-            try:
-                res = requests.post(BACKEND_URL, json=payload, timeout=30)
-                if res.status_code == 200:
-                    response = res.json().get("reply", "No reply received")
-                else:
-                    response = f"Error {res.status_code}: {res.text}"
-            except Exception as e:
-                response = f"Error: {e}"
+            response = send_request(prompt)
 
             time.sleep(0.5)
             message_placeholder.markdown(response)
@@ -85,3 +73,20 @@ if prompt := st.chat_input("Type your message..."):
     # Add assistant message
     st.session_state["messages"].append({"role": "assistant", "content": response})
     save_history(user_id, st.session_state["messages"])
+
+# request for chat completion from backend
+def send_request(prompt):
+    payload = {
+        "history": st.session_state["messages"],  # entire conversation so far
+        "message": prompt     # new user message
+    }
+
+    try:
+        res = requests.post(f"{BACKEND_URL}/chat", json=payload, timeout=30)
+        if res.status_code == 200:
+            response = res.json().get("reply", "No reply received")
+        else:
+            return f"Error {res.status_code}: {res.text}"
+    except Exception as e:
+        return f"Error: {e}"
+
