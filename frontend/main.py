@@ -174,10 +174,16 @@ if st.button("Clear Chat History"):
     clear_history(user_id)
     fresh_chat()
 
+# Get directory where this script lives
+BASE_DIR = os.path.dirname(__file__)
 
-HtmlFile = open("test.html", 'r', encoding='utf-8')
-source_code = HtmlFile.read() 
-components.html(source_code, height=700)
+# Construct path to HTML file
+html_path = os.path.join(BASE_DIR, "powerbi", "test.html")
+
+# Read HTML
+with open(html_path, 'r', encoding='utf-8') as HtmlFile:
+    html_content = HtmlFile.read()
+    components.html(html_content, height=700)
 
 # Display sidebar content when toggled
 
