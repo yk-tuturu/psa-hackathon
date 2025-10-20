@@ -170,14 +170,14 @@ def check_export_status(export_id):
         print(f"Error checking export status: {err}")
         return False
 
-if __name__ == "__main__": # trying to export and download report
-    export_id = export_report_to_file()
-    retries = 10
-    for _ in range(retries):
-        if check_export_status(export_id):
-            download_exported_file(export_id)
-            break
-        else:
-            time.sleep(5)
-    else:
-        print("Export process took too long, could not download the file.")
+# if __name__ == "__main__": # trying to export and download report
+#     export_id = export_report_to_file()
+#     retries = 10
+#     for _ in range(retries):
+#         if check_export_status(export_id):
+#             download_exported_file(export_id)
+#             break
+#         else:
+#             time.sleep(5)
+#     else:
+#         print("Export process took too long, could not download the file.")
