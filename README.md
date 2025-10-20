@@ -11,7 +11,10 @@ UI
 - Lightweight sqlite database for storing chat history
 
 Backend
-(someone pls fill)
+- FastAPI: automatic API generation, data validation, and asynchronous capabilities for backend
+- LangChain + Pinecone vectorstore for retrieval augmented generation of relevant context and data, ensuring that the chatbot can generate accurate, informative responses.
+- OpenAI LLM handles natural language as chatbot to respond to users.
+- Power BI API to query data from dashboard, through DAX queries to apply filters
 
 
 ## Screenshots
