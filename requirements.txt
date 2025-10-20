@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+requests
+python-dotenv
+openai
+numpy
+streamlit
+requests
+uuid
+streamlit-cookies-manager
