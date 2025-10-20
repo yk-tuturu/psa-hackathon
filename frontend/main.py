@@ -14,6 +14,8 @@ load_dotenv()
 BACKEND_URL = os.getenv("BACKEND_URL")
 USE_BACKEND = True
 
+st.set_page_config(page_title="Chatbot", page_icon="💬", layout="wide")
+
 st.markdown(
     """
     <style>
@@ -107,7 +109,7 @@ if st.session_state["messages"] == []:
     fresh_chat()
 
 # Set titles
-st.set_page_config(page_title="Chatbot", page_icon="💬", layout="wide")
+
 st.title("💬 PSA Network Insights Dashboard")
 
 # attempt to inject css
