@@ -56,7 +56,7 @@ st.markdown(
 # Initialize cookie manager
 cookies = EncryptedCookieManager(
     prefix="my_app_",  # optional prefix to avoid collisions
-    password=os.getenv("DB_PASSWORD")  # must be at least 16 chars
+    password=os.getenv("COOKIE_PASSWORD")  # must be at least 16 chars
 )
 
 # Wait until cookies are loaded
