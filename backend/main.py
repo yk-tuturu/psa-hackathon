@@ -21,6 +21,10 @@ class ChatMessage(BaseModel):
     history: list  # stateful, e.g. [{"role": "user", "content": ...}, {"role": "assistant", "content": ...}]
     message: str
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
 @app.get("/report")
 def get_report():
     return get_report_details()
