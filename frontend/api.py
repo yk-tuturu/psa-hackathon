@@ -6,14 +6,18 @@ load_dotenv()
 
 BACKEND_URL = os.getenv("BACKEND_URL")
 
-def get_chat_completion(prompt, history):
+def get_chat_completion(prompt, history, apiKey):
     payload = {
         "history": history,  # entire conversation so far
         "message": prompt     # new user message
     }
 
+    headers = {
+        "Authorization": "Bearer " + apiKey
+    }
+
     try:
-        res = requests.post(f"{BACKEND_URL}/chat", json=payload, timeout=100)
+        res = requests.post(f"{BACKEND_URL}/chat", json=payload, headers=headers, timeout=100)
         if res.status_code == 200:
             return res.json().get("reply", "No reply received")
         else:

@@ -252,7 +252,7 @@ def sendMessage(prompt):
         message_placeholder.markdown("...")
 
         if USE_BACKEND:
-            response = get_chat_completion(prompt, st.session_state["messages"])
+            response = get_chat_completion(prompt, st.session_state["messages"], st.session_state["apiKey"])
 
             time.sleep(0.5)
             message_placeholder.markdown(response)
