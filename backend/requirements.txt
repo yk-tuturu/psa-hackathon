@@ -4,3 +4,6 @@ requests
 python-dotenv
 openai
 numpy
+langchain-community
+langchain=0.0.349
+pinecone
