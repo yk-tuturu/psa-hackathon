@@ -61,68 +61,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Initialize cookie manager
-cookies = EncryptedCookieManager(
-    prefix="my_app_", 
-    password=get_secret("COOKIE_PASSWORD")
-)
-
-# Wait until cookies are loaded
-if not cookies.ready():
-    st.stop()
-
-# Check if a persistent user_id cookie exists
-if "user_id" not in cookies:
-    # Create a new user_id and store it in cookies
-    user_id = str(uuid.uuid4())
-    cookies["user_id"] = user_id
-    cookies.save()  # important: save to browser
-else:
-    user_id = cookies["user_id"]
-
-# OPENAI key popup
-# @st.dialog("Enter OpenAI API key", width="medium", dismissible=False)
-# def getAPIKey():
-#     st.write("Just key in anything, this is just for testing")
-#     apiKey = st.text_input("", placeholder="Enter API key...", label_visibility="hidden")
-#     if st.button("Enter"):
-#         saveAPIKey(apiKey)
-    
-#     if (apiKey):
-#         saveAPIKey(apiKey)
-        
-# def saveAPIKey(key):
-#     # Include some verification for the openai key later on
-#     st.session_state["apiKey"] = key
-#     st.rerun()
-
-# if "apiKey" not in st.session_state:
-#     getAPIKey()
-#     st.stop()
-# else:
-#     print(st.session_state["apiKey"])
-
-def fresh_chat():
-    st.session_state["messages"] = []
-    st.session_state["messages"].append({
-        "role": "assistant", 
-        "content": "Hi there! This is Navi-Bot, your PSA Dashboard Assistant! \n\n You can ask me about anything!",
-        "button": True})
-    save_history(user_id, st.session_state["messages"])
-
-# Load chat history from db
-if "messages" not in st.session_state:
-    st.session_state["messages"] = load_history(user_id)
-
-if "button_clicked" not in st.session_state:
-    st.session_state["button_clicked"] = None
-
-if st.session_state["messages"] == []:
-    fresh_chat()
-
-# Set titles
-st.title("💬 Navi-Bot")
-
 # attempt to inject css
 st.markdown(
     """
@@ -213,9 +151,27 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-if st.button("Clear Chat History"):
-    clear_history(user_id)
-    fresh_chat()
+# Initialize cookie manager
+cookies = EncryptedCookieManager(
+    prefix="my_app_", 
+    password=get_secret("COOKIE_PASSWORD")
+)
+
+# Wait until cookies are loaded
+if not cookies.ready():
+    st.stop()
+
+# Check if a persistent user_id cookie exists
+if "user_id" not in cookies:
+    # Create a new user_id and store it in cookies
+    user_id = str(uuid.uuid4())
+    cookies["user_id"] = user_id
+    cookies.save()  # important: save to browser
+else:
+    user_id = cookies["user_id"]
+
+# Set titles
+st.title("💬 Navi-Bot")
 
 # Get directory where this script lives
 BASE_DIR = os.path.dirname(__file__)
@@ -227,6 +183,51 @@ html_path = os.path.join(BASE_DIR, "powerbi", "test.html")
 with open(html_path, 'r', encoding='utf-8') as HtmlFile:
     html_content = HtmlFile.read()
     components.html(html_content, height=550)
+
+# OPENAI key popup
+@st.dialog("Enter OpenAI API key", width="medium", dismissible=False)
+def getAPIKey():
+    apiKey = st.text_input("", placeholder="Enter API key...", label_visibility="hidden")
+    if st.button("Enter"):
+        saveAPIKey(apiKey)
+
+    if (apiKey):
+        saveAPIKey(apiKey)
+    
+def saveAPIKey(key):
+    # Include some verification for the openai key later on
+    st.session_state["apiKey"] = key
+    st.rerun()
+
+if "apiKey" not in st.session_state:
+    getAPIKey()
+    st.stop()
+else:
+    print("api key obtained")
+
+
+def fresh_chat():
+    st.session_state["messages"] = []
+    st.session_state["messages"].append({
+        "role": "assistant", 
+        "content": "Hi there! This is Navi-Bot, your PSA Dashboard Assistant! \n\n You can ask me about anything!",
+        "button": True})
+    save_history(user_id, st.session_state["messages"])
+
+# Load chat history from db
+if "messages" not in st.session_state:
+    st.session_state["messages"] = load_history(user_id)
+
+if "button_clicked" not in st.session_state:
+    st.session_state["button_clicked"] = None
+
+if st.session_state["messages"] == []:
+    fresh_chat()
+
+if st.button("Clear Chat History"):
+    clear_history(user_id)
+    fresh_chat()
+
 
 def getAvatar(role):
     if role == "user":

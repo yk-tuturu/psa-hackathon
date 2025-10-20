@@ -5,11 +5,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = AzureOpenAI(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version="2025-01-01-preview",
-    azure_endpoint=os.getenv("AZURE_OPENAI_API_ENDPOINT")
-)
+# client = AzureOpenAI(
+#     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+#     api_version="2025-01-01-preview",
+#     azure_endpoint=os.getenv("AZURE_OPENAI_API_ENDPOINT")
+# )
 
 # Predefined intents with example text
 intent_examples = {
@@ -30,14 +30,27 @@ intent_examples = {
     "other": "Anything that does not fit the above categories"
 }
 
-# Precompute embeddings for intents
 intent_embeddings = {}
-for intent, text in intent_examples.items():
-    response = client.embeddings.create(
-        model="text-embedding-3-small",
-        input=text
+
+def make_client(apiKey):
+    client = AzureOpenAI(
+        api_key=apiKey,
+        api_version="2025-01-01-preview",
+        azure_endpoint=os.getenv("AZURE_OPENAI_API_ENDPOINT")
     )
-    intent_embeddings[intent] = response.data[0].embedding
+
+    return client
+
+def compute_intents(apiKey):
+    # Precompute embeddings for intents
+    client = make_client(apiKey)
+
+    for intent, text in intent_examples.items():
+        response = client.embeddings.create(
+            model="text-embedding-3-small",
+            input=text
+        )
+        intent_embeddings[intent] = response.data[0].embedding
 
 # Cosine similarity function
 def cosine_similarity(a, b):
@@ -45,8 +58,16 @@ def cosine_similarity(a, b):
     b = np.array(b)
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-def classify_intent(user_message: str) -> str:
+def classify_intent(user_message: str, apiKey: str) -> str:
     """Return the predicted intent based on embedding similarity."""
+    if apiKey == None:
+        return "other"
+    
+    if intent_embeddings == {}:
+        return "other"
+    
+    client = make_client(apiKey)
+
     response = client.embeddings.create(
         model="text-embedding-3-small",
         input=user_message

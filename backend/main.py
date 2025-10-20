@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai_client import summarize_metrics, chat_with_dashboard
@@ -33,13 +33,33 @@ def get_report():
 def get_embed_token():
     return generate_embed_token()
 
+@app.post("/compute-intent")
+def compute_intents():
+    body = await request.json()
+    authorization = request.headers.get("Authorization")
+
+    if not authorization:
+        raise HTTPException(status_code=400, detail="Missing api key")
+    
+    api_key = authorization.replace("Bearer ", "").strip()
+    compute_intents(api_key)
+
+    return {"status": "ok"}
+
 @app.post("/summarize")
 def summarize(request: MetricsRequest):
     summary = summarize_metrics(request.metrics)
     return {"summary": summary}
 
-
 @app.post("/chat")
-def chat(msg: ChatMessage):
-    reply = chat_with_dashboard(msg.history, msg.message)
+def chat(request: Request):
+    body = await request.json()
+    authorization = request.headers.get("Authorization")
+
+    if not authorization:
+        raise HTTPException(status_code=400, detail="Missing api key")
+    
+    api_key = authorization.replace("Bearer ", "").strip()
+    reply = chat_with_dashboard(body["history"], body["message"], api_key)
+
     return {"reply": reply}

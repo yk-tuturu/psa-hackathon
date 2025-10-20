@@ -6,13 +6,22 @@ from intent import classify_intent
 
 load_dotenv()
 
-client = AzureOpenAI(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version="2025-01-01-preview",
-    azure_endpoint=os.getenv("AZURE_OPENAI_API_ENDPOINT")
-)
+# client = AzureOpenAI(
+#     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+#     api_version="2025-01-01-preview",
+#     azure_endpoint=os.getenv("AZURE_OPENAI_API_ENDPOINT")
+# )
 
-def summarize_metrics(metrics: dict) -> str:
+def make_client(apiKey: str):
+    client = AzureOpenAI(
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+        api_version="2025-01-01-preview",
+        azure_endpoint=os.getenv("AZURE_OPENAI_API_ENDPOINT")
+    )
+
+    return client
+
+def summarize_metrics(metrics: dict, apiKey: str) -> str:
     prompt = f"""
     You are an AI assistant that interprets key operational metrics 
     from PSA’s Global Insights Dashboard.
@@ -33,7 +42,7 @@ def summarize_metrics(metrics: dict) -> str:
 
     Be concise, insightful, and use data-driven reasoning suitable for a management dashboard.
     """
-
+    client = make_client(apiKey)
     response = client.chat.completions.create(
         model=os.getenv("OPENAI_MODEL"),
         messages=[{"role": "user", "content": prompt}],
@@ -43,12 +52,14 @@ def summarize_metrics(metrics: dict) -> str:
     return response.choices[0].message.content
 
 
-def chat_with_dashboard(history: list, message: str) -> str:
-    intent = classify_intent(message)
+def chat_with_dashboard(history: list, message: str, apiKey: str) -> str:
+    intent = classify_intent(message, apiKey)
     print(intent)
 
+    client = make_client(apiKey)
+
     if "summary" == intent:
-        summary = summarize_metrics(get_latest_metrics())
+        summary = summarize_metrics(get_latest_metrics(), apiKey)
         return f"Here’s the current dashboard summary:\n\n{summary}"
 
     
@@ -73,7 +84,9 @@ def chat_with_dashboard(history: list, message: str) -> str:
     return response.choices[0].message.content
 
 
-def query_to_dax(query):
+def query_to_dax(query: str, apiKey: str):
+    client = make_client(apiKey)
+
     try:
         prompt = f"""
         You are an expert in Power BI DAX queries.
