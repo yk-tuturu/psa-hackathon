@@ -64,7 +64,6 @@ def chat_with_dashboard(history: list, message: str) -> str:
     ]
 
 
-
     response = client.chat.completions.create(
         model=os.getenv("OPENAI_MODEL"),
         messages=messages,
@@ -73,11 +72,29 @@ def chat_with_dashboard(history: list, message: str) -> str:
 
     return response.choices[0].message.content
 
-#if __name__ == "__main__":
-#    sample_metrics = {
-#        "berth_time": 12.5,
-#        "carbon_savings": 1500,
-#        "arrival_accuracy": 95.2
-#    }
-#    summary = summarize_metrics(sample_metrics)
-#    print(summary)
+
+def query_to_dax(query):
+    try:
+        prompt = f"""
+        You are an expert in Power BI DAX queries.
+        Given the following query, return only the DAX expression needed to answer it. 
+        Do not provide any explanations or extra text. Just return the DAX expression.
+
+         The dataset for this report includes the following tables and fields:
+        
+        """
+
+        messages = [{"role": "system", "content": prompt}] +  [
+            {"role": "user", "content": query}
+        ]
+            
+        response = client.chat.completions.create(
+            model=os.getenv("OPENAI_MODEL"),
+            messages=messages,
+            max_tokens=50
+        )
+        dax_query = response.choices[0].message.content
+        return dax_query
+    except Exception as e:
+        print(f"Error converting query to DAX: {e}")
+        return None
