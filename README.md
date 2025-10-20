@@ -1,8 +1,8 @@
 # Navi-bot
 
-### A smart assistant for interpreting dashboard analytics and providing actionable insights. Allows for faster monitoring of globally connected networks and improves operation synergy.
+A smart assistant for interpreting dashboard analytics and providing actionable insights. Allows for faster monitoring of globally connected networks and improves operation synergy.
 
-### View it live here -> https://psa-hackathon.streamlit.app/
+View it live here -> https://psa-hackathon.streamlit.app/
 
 ![PSA Dashboard](https://i.imgur.com/I6KKVXD.png)
 ![PSA Dashboard](https://i.imgur.com/zY8L0yy.png)
