@@ -168,8 +168,8 @@ st.markdown(
     }
 
     .stMainBlockContainer {
-        padding-left: 25rem;
-        padding-right: 25rem;
+        padding-left: 18rem;
+        padding-right: 18rem;
         padding-top: 3rem;
         padding-bottom: 1rem;
     }
@@ -193,8 +193,8 @@ st.markdown(
     }
 
     .stBottom{
-        padding-left: 18rem;
-        padding-right: 18rem;
+        padding-left: 12rem;
+        padding-right: 12rem;
     }
 
     .stHeading h1 {
