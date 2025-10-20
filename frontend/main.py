@@ -98,7 +98,7 @@ def fresh_chat():
     st.session_state["messages"] = []
     st.session_state["messages"].append({
         "role": "assistant", 
-        "content": "Hi there! This is your PSA Dashboard Assistant! \n\n You can ask me about anything!",
+        "content": "Hi there! This is Navi-Bot, your PSA Dashboard Assistant! \n\n You can ask me about anything!",
         "button": True})
     save_history(user_id, st.session_state["messages"])
 
@@ -119,7 +119,7 @@ st.title("💬 Navi-Bot")
 st.markdown(
     """
     <style>
-    .stChatInput {
+    .stChatInput * {
         border-width: 0px !important;
     }
 
@@ -174,7 +174,7 @@ st.markdown(
         padding-bottom: 1rem;
     }
 
-    .stChatMessage p {
+    .stChatMessage p, .stChatMessage li {
         font-size: 20px;
     }
 
@@ -195,6 +195,10 @@ st.markdown(
     .stBottom{
         padding-left: 18rem;
         padding-right: 18rem;
+    }
+
+    .stHeading h1 {
+        font-size: 64px;
     }
     </style>
     """,
