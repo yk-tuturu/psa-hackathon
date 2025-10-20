@@ -9,9 +9,17 @@ from history import get_user_id, load_history, save_history, clear_history
 from api import get_chat_completion
 import streamlit.components.v1 as components
 
-load_dotenv()
+if os.path.exists(".env"):
+    load_dotenv()
 
-BACKEND_URL = os.getenv("BACKEND_URL")
+def get_secret(key, default=None):
+    if os.getenv(key):
+        return os.getenv(key)
+    if hasattr(st, "secrets") and key in st.secrets:
+        return st.secrets[key]
+    return default
+
+BACKEND_URL = get_secret("BACKEND_URL")
 USE_BACKEND = True
 
 st.set_page_config(page_title="Chatbot", page_icon="💬", layout="wide")
@@ -55,8 +63,8 @@ st.markdown(
 
 # Initialize cookie manager
 cookies = EncryptedCookieManager(
-    prefix="my_app_",  # optional prefix to avoid collisions
-    password=os.getenv("DB_PASSWORD")  # must be at least 16 chars
+    prefix="my_app_", 
+    password=get_secret("COOKIE_PASSWORD")
 )
 
 # Wait until cookies are loaded
@@ -98,7 +106,7 @@ def fresh_chat():
     st.session_state["messages"] = []
     st.session_state["messages"].append({
         "role": "assistant", 
-        "content": "Hi there! This is your PSA Dashboard Assistant! \n\n You can ask me about anything!",
+        "content": "Hi there! This is Navi-Bot, your PSA Dashboard Assistant! \n\n You can ask me about anything!",
         "button": True})
     save_history(user_id, st.session_state["messages"])
 
@@ -119,7 +127,7 @@ st.title("💬 Navi-Bot")
 st.markdown(
     """
     <style>
-    .stChatInput {
+    .stChatInput * {
         border-width: 0px !important;
     }
 
@@ -168,13 +176,13 @@ st.markdown(
     }
 
     .stMainBlockContainer {
-        padding-left: 25rem;
-        padding-right: 25rem;
+        padding-left: 18rem;
+        padding-right: 18rem;
         padding-top: 3rem;
         padding-bottom: 1rem;
     }
 
-    .stChatMessage p {
+    .stChatMessage p, .stChatMessage li {
         font-size: 20px;
     }
 
@@ -193,8 +201,12 @@ st.markdown(
     }
 
     .stBottom{
-        padding-left: 18rem;
-        padding-right: 18rem;
+        padding-left: 12rem;
+        padding-right: 12rem;
+    }
+
+    .stHeading h1 {
+        font-size: 64px;
     }
     </style>
     """,
