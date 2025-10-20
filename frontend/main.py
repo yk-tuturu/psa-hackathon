@@ -72,7 +72,7 @@ if "user_id" not in cookies:
 else:
     user_id = cookies["user_id"]
 
-# # ---- OPENAI KEY POPUP ----
+# OPENAI key popup
 # @st.dialog("Enter OpenAI API key", width="medium", dismissible=False)
 # def getAPIKey():
 #     st.write("Just key in anything, this is just for testing")
@@ -98,19 +98,23 @@ def fresh_chat():
     st.session_state["messages"] = []
     st.session_state["messages"].append({
         "role": "assistant", 
-        "content": "Hi there! This is your PSA Dashboard Assistant! \n\n You can ask me about anything!"})
+        "content": "Hi there! This is your PSA Dashboard Assistant! \n\n You can ask me about anything!",
+        "button": True})
     save_history(user_id, st.session_state["messages"])
 
 # Load chat history from db
 if "messages" not in st.session_state:
     st.session_state["messages"] = load_history(user_id)
 
+if "button_clicked" not in st.session_state:
+    st.session_state["button_clicked"] = None
+
 if st.session_state["messages"] == []:
     fresh_chat()
 
 # Set titles
 
-st.title("💬 PSA Network Insights Dashboard")
+st.title("💬 Navi-Bot")
 
 # attempt to inject css
 st.markdown(
@@ -143,10 +147,14 @@ st.markdown(
     }
 
     .stMainBlockContainer {
-        padding-left: 15rem;
-        padding-right: 15rem;
+        padding-left: 25rem;
+        padding-right: 25rem;
         padding-top: 3rem;
         padding-bottom: 1rem;
+    }
+
+    .stChatMessage p {
+        font-size: 20px;
     }
 
     #tabs-bui2-tabpanel-1 {
@@ -164,8 +172,8 @@ st.markdown(
     }
 
     .stBottom{
-        padding-left: 9rem;
-        padding-right: 9rem;
+        padding-left: 18rem;
+        padding-right: 18rem;
     }
     </style>
     """,
@@ -185,19 +193,11 @@ html_path = os.path.join(BASE_DIR, "powerbi", "test.html")
 # Read HTML
 with open(html_path, 'r', encoding='utf-8') as HtmlFile:
     html_content = HtmlFile.read()
-    components.html(html_content, height=700)
+    components.html(html_content, height=550)
 
-# Display sidebar content when toggled
-
-# Load messages into UI
-for msg in st.session_state["messages"]:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-# User input
-if prompt := st.chat_input("Type your message..."):
+def sendMessage(prompt):
     # Add user message
-    st.session_state["messages"].append({"role": "user", "content": prompt})
+    st.session_state["messages"].append({"role": "user", "content": prompt, "button": False})
 
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -220,12 +220,34 @@ if prompt := st.chat_input("Type your message..."):
             message_placeholder.markdown(response)
 
     # Add assistant message
-    st.session_state["messages"].append({"role": "assistant", "content": response})
+    st.session_state["messages"].append({"role": "assistant", "content": response, "button": False})
 
     if len(st.session_state["messages"]) > 10:
         st.session_state["messages"].pop(0)
     
     save_history(user_id, st.session_state["messages"])
+
+# Load messages into UI
+for msg in st.session_state["messages"]:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if (msg["button"]):
+            if st.button("Generate dashboard summary"):
+                st.session_state["button_clicked"] = "Generate dashboard summary"
+            if st.button("What are key actions we can take to improve reliability in our network"):
+                 st.session_state["button_clicked"] = "What are key actions we can take to improve reliability in our network"
+            if st.button("Are there any regions or departments experiencing notable deviations or issues?"):
+                st.session_state["button_clicked"] = "Are there any regions or departments experiencing notable deviations or issues?"
+
+if st.session_state["button_clicked"]:
+    sendMessage(st.session_state["button_clicked"])
+    st.session_state["button_clicked"] = None
+
+# User input
+if prompt := st.chat_input("Type your message..."):
+    sendMessage(prompt)
+
+
 
 
     
