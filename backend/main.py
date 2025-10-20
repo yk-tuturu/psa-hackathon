@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai_client import summarize_metrics, chat_with_dashboard
 from powerbi_client import generate_embed_token, get_latest_metrics, get_report_details
+from intent import compute_intents
 
 app = FastAPI()
 
@@ -35,7 +36,7 @@ def get_embed_token():
 
 @app.post("/compute-intent")
 def compute_intents():
-    body = await request.json()
+    body = request.json()
     authorization = request.headers.get("Authorization")
 
     if not authorization:
@@ -53,7 +54,7 @@ def summarize(request: MetricsRequest):
 
 @app.post("/chat")
 def chat(request: Request):
-    body = await request.json()
+    body = request.json()
     authorization = request.headers.get("Authorization")
 
     if not authorization:
