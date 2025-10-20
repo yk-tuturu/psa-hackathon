@@ -4,10 +4,23 @@ A smart assistant for interpreting dashboard analytics and providing actionable 
 
 View it live here -> https://psa-hackathon.streamlit.app/
 
-![PSA Dashboard](https://i.imgur.com/I6KKVXD.png)
-![PSA Dashboard](https://i.imgur.com/zY8L0yy.png)
+## Features
+UI
+- Seamless and modern chatbot interface for easy querying
+- Embedded Microsoft BI dashboard to reference
+- Lightweight sqlite database for storing chat history
 
-<br></br>
+Backend
+(someone pls fill)
+
+
+## Screenshots
+<p float="left">
+  <img src="https://i.imgur.com/I6KKVXD.png" alt="Screenshot of gameplay" width=600/>
+  
+</p>
+<img src="https://i.imgur.com/zY8L0yy.png" alt="Screenshot of gameplay" width=600/>
+
 ### Setup to run locally
 1. Clone the repo onto your machine
 2. (Recommended) Start a python venv in the root folder
