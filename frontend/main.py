@@ -6,7 +6,7 @@ import os
 import uuid
 from dotenv import load_dotenv
 from history import get_user_id, load_history, save_history, clear_history
-from api import get_chat_completion
+from api import get_chat_completion, compute_intents
 import streamlit.components.v1 as components
 
 if os.path.exists(".env"):
@@ -170,6 +170,9 @@ if "user_id" not in cookies:
 else:
     user_id = cookies["user_id"]
 
+if "intent_computed" not in st.session_state:
+    st.session_state["intent_computed"] = False
+
 # Set titles
 st.title("💬 Navi-Bot")
 
@@ -202,9 +205,9 @@ def saveAPIKey(key):
 if "apiKey" not in st.session_state:
     getAPIKey()
     st.stop()
-else:
-    print("api key obtained")
-
+elif st.session_state["intent_computed"] == False:
+    compute_intents()
+    st.session_state["intent_computed"] = True
 
 def fresh_chat():
     st.session_state["messages"] = []
