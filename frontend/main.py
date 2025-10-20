@@ -113,7 +113,6 @@ if st.session_state["messages"] == []:
     fresh_chat()
 
 # Set titles
-
 st.title("💬 Navi-Bot")
 
 # attempt to inject css
@@ -140,6 +139,28 @@ st.markdown(
         pointer-events: none;
         opacity: 0;           /* start invisible */
         transition: opacity 0.1s ease-in-out;
+    }
+
+    .stButton::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 100;
+        border-radius: 0.5rem;
+        padding: 1.5px; /* border thickness */
+        background: linear-gradient(45deg, #3b82f6, #8b5cf6); /* blue → purple */
+        -webkit-mask: 
+            linear-gradient(#fff 0 0) content-box, 
+            linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0;           /* start invisible */
+        transition: opacity 0.07s ease-in-out;
+    }
+
+    .stButton:hover::before {
+        opacity: 1
     }
 
     .stChatInput:focus-within::before {
@@ -195,15 +216,21 @@ with open(html_path, 'r', encoding='utf-8') as HtmlFile:
     html_content = HtmlFile.read()
     components.html(html_content, height=550)
 
+def getAvatar(role):
+    if role == "user":
+        return os.path.join(BASE_DIR, "images", "person.png")
+    elif role == "assistant":
+        return os.path.join(BASE_DIR, "images", "bot.png")
+
 def sendMessage(prompt):
     # Add user message
     st.session_state["messages"].append({"role": "user", "content": prompt, "button": False})
 
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar=getAvatar("user")):
         st.markdown(prompt)
     
     # Get response
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar=getAvatar("assistant")):
         response = ""
         message_placeholder = st.empty()
         message_placeholder.markdown("...")
@@ -229,7 +256,7 @@ def sendMessage(prompt):
 
 # Load messages into UI
 for msg in st.session_state["messages"]:
-    with st.chat_message(msg["role"]):
+    with st.chat_message(msg["role"], avatar=getAvatar(msg["role"])):
         st.markdown(msg["content"])
         if (msg["button"]):
             if st.button("Generate dashboard summary"):
